@@ -5,22 +5,10 @@
 from cryptography.fernet import Fernet
 import sys
 
-def menus(nr):
-	if ( nr == 0 ):
-		print("----------------------------")
-		print("|   Flowless' Pycryptium   |")
-		print("----------------------------")
-		print(" ")
-		print("[1] Encryption")
-		print("[2] Decryption")
-		print("[0] Exit")
-	if ( nr == 1 ):
-		print("You've chosen Encryption.")
-
-
-	ans = input('Option: ')
-
-	return ans
+def menu():
+	print("----------------------------")
+	print("|   Flowless' Pycryptium   |")
+	print("----------------------------")
 
 def readfile(inp):
 	file = open(inp, 'r')
@@ -31,14 +19,13 @@ def readfile(inp):
 def writefile(path, text):
 	file = open(path, 'w')
 	file.write(text)
-	print("Key --> " + path)
+	print("Written --> " + path)
 	file.close()
 
 def encrypt():
+	menu()
 	print("You have chosen Encryption. AES_128_CBC_PKCS7 is used.")
-	inp = None
-	while not inp:
-		inp = raw_input('String for encryption: ')
+	inp = sys.argv[2]
 	#Key-generate, Base64-encoded, SECRET, SYMMETRIC ENCRYPTION
 	key = Fernet.generate_key()
 	## KEY is written to def.skey
@@ -46,7 +33,7 @@ def encrypt():
 	#Creates a Fernet-object with the given key
 	f = Fernet(key)
 	#Creates the token (the enc content)
-	token = f.encrypt(inp)
+	token = f.encrypt(readfile(inp))
 	out = None
 	while not out:
 		out = raw_input('Path for output_content: ')
@@ -54,11 +41,10 @@ def encrypt():
 	print("CHECK_Decrypt: " + f.decrypt(token))
 
 def decrypt():
+	menu()
 	print("You have chosen Decryption. AES_128_CBC_PKCS7 will be decrypted.")
-	# Makes sure that decrypt-file is given
-	inp = None
-	while not inp:
-		inp = raw_input('File for decryption: ')
+	# File to decrypt is argument after option
+	inp = sys.argv[2]
 	# Makes sure that secret key file is given
 	d_key = None
 	while not d_key:
@@ -74,21 +60,21 @@ def decrypt():
 	# decrypts intended stuffs
 	print("Decrypted: " + f.decrypt(token) )
 
-def choice():
+def init():
 	if (sys.argv[1] == '-e'):
-		print("You've chosen ENcryption mode.")
+		encrypt()
 	elif (sys.argv[1] == '-d'):
-		print("You've chosen DEcryption mode.")
+		decrypt()
 	else:
-		print("Invalid option.")
+		print("Invalid option or no file given.")
 
 	sys.exit()
 
-if (len(sys.argv) < 2):
+if (len(sys.argv) < 3):
 	print("USAGE: ./pycryptium.py [option] [file_path]")
 	print("Options: Encryption [-e], Decryption [-d]")
 	sys.exit()
 
-choice()
+init()
 
 sys.exit()
